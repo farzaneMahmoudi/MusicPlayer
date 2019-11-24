@@ -8,7 +8,8 @@
     android:layout_height="match_parent"
     android:id="@+id/container_fragment"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    android:background="#01061B"
+    tools:context=".Controller.MainActivity">
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/viewpager"
@@ -21,8 +22,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/colorPrimary"
-            app:tabIndicatorColor="#EBCE4F"
-            app:tabSelectedTextColor="#EBCE4F"
+            app:tabIndicatorColor="@color/colorAccent"
+            app:tabSelectedTextColor="#F8F7F2"
             app:tabTextColor="#F0EFEB" />
     </androidx.viewpager.widget.ViewPager>
 

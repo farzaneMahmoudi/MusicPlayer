@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_list_items"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="8dp"
+    tools:context=".Controller.ListItemsFragment">
+
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:padding="8dp"
+        android:gravity="center"
+        android:id="@+id/image_view_album_item_selected"
+        android:src="@drawable/music_cover"
+        android:layout_marginBottom="8dp"
+        >
+
+    </ImageView>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:id="@+id/text_view_album_name_item_selected"
+        android:textColor="#F3EDED"
+        android:textStyle="bold"
+        android:padding="2dp"
+        android:layout_margin="4dp"
+        >
+    </TextView>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:id="@+id/text_view_singer_name_item_selected"
+        android:textColor="#F3EDED"
+        android:padding="2dp"
+        android:layout_margin="4dp"
+        >
+    </TextView>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_list_items"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="8dp"
+        >
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+</LinearLayout>
+

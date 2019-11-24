@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#080D27"
-    tools:context=".TabFragment">
+    android:background="#01061B"
+    tools:context=".Controller.TabFragment">
 
     <ScrollView
         android:layout_width="match_parent"
