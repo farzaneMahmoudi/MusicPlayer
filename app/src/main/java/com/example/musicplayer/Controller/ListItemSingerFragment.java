@@ -1,11 +1,7 @@
-package com.example.musicplayer;
+package com.example.musicplayer.Controller;
 
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
@@ -14,9 +10,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -26,61 +19,61 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.example.musicplayer.Model.Album;
 import com.example.musicplayer.Model.Music;
-import com.example.musicplayer.Model.TabState;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.example.musicplayer.Model.Singer;
+import com.example.musicplayer.R;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class TabFragment extends Fragment {
+public class ListItemSingerFragment extends Fragment {
 
-
-    public static final String ARG_POSITION_TAB = "arg_position_tab";
-    public static final String ARG_TAB_STATE = "tab_State";
-    public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123;
-
+    public static final String ARG_ALBUM = "ARG_ALBUM";
+    public static final String ARG_SINGER = "ARG_SINGER";
+    private Uri albumUri;
+    private ArrayList musicList;
+    private ListItemSingerFragment.Adapter musicAdapter;
     private RecyclerView mRecyclerView;
-    private musicAdapter musicAdapter;
-    private BottomSheetBehavior mBottomSheetBehavior;
-    private CallBack mCallBack;
-    private ArrayList<Music> musicList;
-
-    private boolean flagIsPlaying;
     private MediaPlayerControler mMediaPlayerControler;
+    private CallBackList mCallBack;
+    private ImageView mImageViewCoverAlbum;
+    private TextView mTextViewSinger;
+    private Singer mSinger;
 
-    private android.media.MediaPlayer mMediaPlayer;
 
-    private TabState mTabState;
-
-    public static TabFragment newInstance(TabState tabState) {
+    public static ListItemSingerFragment newInstance(Singer singer) {
 
         Bundle args = new Bundle();
 
-        args.putSerializable(ARG_TAB_STATE, tabState);
-        TabFragment fragment = new TabFragment();
+        args.putSerializable(ARG_ALBUM, singer);
+        ListItemSingerFragment fragment = new ListItemSingerFragment();
         fragment.setArguments(args);
         return fragment;
     }
 
-    public TabFragment() {
+    public ListItemSingerFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        mSinger = (Singer) getArguments().getSerializable(ARG_ALBUM);
+        mMediaPlayerControler = MediaPlayerControler.getInstance(getContext());
+
     }
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
+        if (context instanceof CallBackList)
+            mCallBack = (CallBackList) context;
 
-        if (context instanceof CallBack)
-            mCallBack = (CallBack) context;
     }
 
     @Override
@@ -90,57 +83,44 @@ public class TabFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        mTabState = (TabState) getArguments().getSerializable(ARG_TAB_STATE);
-
-        mMediaPlayerControler = MediaPlayerControler.getInstance(getActivity());
-
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_tab, container, false);
+        View view = inflater.inflate(R.layout.fragment_list_item_singer, container, false);
 
-        initUI(view);
+        findView(view);
+
+        setUI();
         setAdapter();
 
         return view;
     }
 
-    private void setAdapter() {
+    private void findView(View view) {
+        mRecyclerView = view.findViewById(R.id.recycler_view_list_items);
+        mImageViewCoverAlbum = view.findViewById(R.id.image_view_album_item_selected);
+        mTextViewSinger = view.findViewById(R.id.text_view_singer_name_item_selected);
+    }
 
+    private void setUI() {
+        mTextViewSinger.setText(mSinger.getSingerName());
 
-        if (mTabState == TabState.musics) {
-
-
-
-
-            /*    Collections.sort(mMediaPlayerControler.getMusicsList(getActivity()), new Comparator<Music>() {
-                    public int compare(Music a, Music b) {
-                        return a.getTitle().compareTo(b.getTitle());
-                    }
-                });*/
-            musicList = mMediaPlayerControler.getMusics();
-            musicAdapter = new musicAdapter(musicList);
-            mRecyclerView.setAdapter(musicAdapter);
-
-
+        if (BitmapFactory.decodeFile(mSinger.getCoverMusic()) == null) {
+            mImageViewCoverAlbum.setImageResource(R.drawable.music_cover);
+        } else {
+            mImageViewCoverAlbum.setImageBitmap(BitmapFactory.decodeFile(mSinger.getCoverMusic()));
         }
 
     }
 
-    private void initUI(View view) {
-        mRecyclerView = view.findViewById(R.id.recycler_view);
-        if (mTabState == TabState.musics)
-            mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mRecyclerView.setPadding(8, 8, 8, 90);
+    private void setAdapter() {
+        musicList = mMediaPlayerControler.getMusics(getContext(), mSinger);
+        musicAdapter = new Adapter(musicList);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mRecyclerView.setAdapter(musicAdapter);
     }
 
-    private class musicHolder extends RecyclerView.ViewHolder {
+    private class MusicHolder extends RecyclerView.ViewHolder {
 
         private Music mMusic;
         private TextView mTextViewMusic;
@@ -151,7 +131,8 @@ public class TabFragment extends Fragment {
         private int position;
         private ArrayList<Music> mMusics;
 
-        public musicHolder(@NonNull final View itemView) {
+
+        public MusicHolder(@NonNull final View itemView) {
             super(itemView);
 
             findView(itemView);
@@ -160,15 +141,21 @@ public class TabFragment extends Fragment {
                 @RequiresApi(api = Build.VERSION_CODES.KITKAT)
                 @Override
                 public void onClick(View v) {
-
                     mMediaPlayerControler.play(getActivity(), musicUri);
-                    position = mMediaPlayerControler.getPosition(mMusic);
+                    int position = getPosition(mMusic);
                     mCallBack.onItemMusicSelected(mMusic, position, mMusics);
                 }
 
             });
         }
-
+        @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+        private int getPosition(Music m){
+            for (Music music : mMusics) {
+                if (music.equals(m))
+                    return mMusics.indexOf(m);
+            }
+            return 0;
+        }
 
         private void findView(@NonNull View itemView) {
 
@@ -185,53 +172,48 @@ public class TabFragment extends Fragment {
         public void bind(Music music, int position, ArrayList<Music> musics) {
             this.mMusics = musics;
             this.mMusic = music;
-            //   this.position = position;
+            this.position = position;
             mTextViewMusic.setText(music.getTitle());
             mTextViewSinger.setText(music.getSinger());
             musicUri = mMediaPlayerControler.getMusicUri(mMusic);
-            if(BitmapFactory.decodeFile(music.getCoverMusic()) == null)
+            if (BitmapFactory.decodeFile(music.getCoverMusic()) == null)
                 mImageViewMusicCover.setImageResource(R.drawable.music_cover);
             else
-            mImageViewMusicCover.setImageBitmap(BitmapFactory.decodeFile(music.getCoverMusic()));
+                mImageViewMusicCover.setImageBitmap(BitmapFactory.decodeFile(music.getCoverMusic()));
             mTextViewDuration.setText(music.getDuration());
         }
 
     }
 
-    private class musicAdapter extends RecyclerView.Adapter<musicHolder> {
+    private class Adapter extends RecyclerView.Adapter<ListItemSingerFragment.MusicHolder> {
 
-        private ArrayList<Music> mMusicList;
+        private ArrayList<Music> itemsList;
 
-        public musicAdapter(ArrayList<Music> musicList) {
-            mMusicList = musicList;
-        }
-
-        public void setMusicList(ArrayList<Music> musicList) {
-            mMusicList = musicList;
+        public Adapter(ArrayList itemsList) {
+            this.itemsList = itemsList;
         }
 
         @NonNull
         @Override
-        public musicHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        public ListItemSingerFragment.MusicHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(getActivity());
             View view = inflater.inflate(R.layout.music_item, parent, false);
-            return new musicHolder(view);
+            return new ListItemSingerFragment.MusicHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull musicHolder holder, int position) {
-            holder.bind(mMusicList.get(position), position, mMusicList);
+        public void onBindViewHolder(@NonNull ListItemSingerFragment.MusicHolder holder, int position) {
+            holder.bind(itemsList.get(position), position, itemsList);
         }
 
         @Override
         public int getItemCount() {
-            return mMusicList.size();
+            return itemsList.size();
         }
 
     }
 
-
-    public interface CallBack {
+    public interface CallBackList {
         public void onItemMusicSelected(Music music, int pos, ArrayList<Music> musicArrayList);
     }
 

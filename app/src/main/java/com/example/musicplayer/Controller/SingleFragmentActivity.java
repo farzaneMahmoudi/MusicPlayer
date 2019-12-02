@@ -8,18 +8,19 @@ import android.os.Bundle;
 
 import com.example.musicplayer.R;
 
-public class ListItemActivity extends AppCompatActivity {
+public abstract class SingleFragmentActivity extends AppCompatActivity {
 
-
+    public abstract Fragment createFragment();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list_item);
+        setContentView(R.layout.activity_single_fragment);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentById(R.id.container_fragment_list_item);
+        Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
         if(fragment == null)
-            fragmentManager.beginTransaction().add(R.id.container_fragment_list_item,ListItemsFragment.newInstance()).commit();
-
+            fragmentManager.beginTransaction().replace(R.id.fragment_container, createFragment()).commit();
     }
+
+
 }

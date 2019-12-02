@@ -23,6 +23,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
+        android:id="@+id/constraint_collapsed_bottom_sheet"
         android:layout_height="72dp">
 
         <ImageView

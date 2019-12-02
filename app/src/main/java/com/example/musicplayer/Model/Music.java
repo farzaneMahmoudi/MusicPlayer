@@ -18,22 +18,19 @@ public class Music {
     private int duration;
 
     public String getDuration() {
-        return String.format("%d:%d",
-                TimeUnit.MILLISECONDS.toMinutes(duration),
-                TimeUnit.MILLISECONDS.toSeconds(duration) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration))
-        );
+        String timeLabel = "";
+        int min = duration / 1000 / 60;
+        int sec = duration / 1000 % 60;
+
+        timeLabel += min + ":";
+        if (sec < 10) timeLabel += "0";
+        timeLabel += sec;
+
+        return timeLabel;
     }
 
-    public void setDuration(int duration) {
-        this.duration = duration;
-    }
-
-    public int getPosition() {
-        return position;
-    }
-
-    public void setPosition(int position) {
-        this.position = position;
+    public int getintDuration() {
+        return this.duration;
     }
 
     public Music(Long id, String title, String album, String singer,String coverPic,int duration) {

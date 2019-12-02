@@ -25,18 +25,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:id="@+id/text_view_album_name_item_selected"
-        android:textColor="#F3EDED"
-        android:textStyle="bold"
-        android:padding="2dp"
-        android:layout_margin="4dp"
-        >
-    </TextView>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
         android:id="@+id/text_view_singer_name_item_selected"
         android:textColor="#F3EDED"
         android:padding="2dp"
