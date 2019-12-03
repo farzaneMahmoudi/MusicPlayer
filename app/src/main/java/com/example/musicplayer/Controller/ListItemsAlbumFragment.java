@@ -22,7 +22,6 @@ import android.widget.TextView;
 
 import com.example.musicplayer.Model.Album;
 import com.example.musicplayer.Model.Music;
-import com.example.musicplayer.Model.Singer;
 import com.example.musicplayer.R;
 
 import java.util.ArrayList;

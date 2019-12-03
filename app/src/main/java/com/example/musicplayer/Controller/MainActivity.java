@@ -8,6 +8,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.viewpager.widget.ViewPager;
 
@@ -18,6 +19,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -30,7 +32,12 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.musicplayer.Adapter.AlbumAdapter;
+import com.example.musicplayer.Adapter.MusicAdapter;
+import com.example.musicplayer.Adapter.SingerAdapter;
+import com.example.musicplayer.Model.Album;
 import com.example.musicplayer.Model.Music;
+import com.example.musicplayer.Model.Singer;
 import com.example.musicplayer.R;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.tabs.TabLayout;
@@ -41,7 +48,13 @@ import static com.example.musicplayer.Controller.TabFragment.MY_PERMISSIONS_REQU
 import static com.example.musicplayer.Controller.TabFragment.TAG_ALBUM__FRAGMENT_SELECTED;
 import static com.example.musicplayer.Controller.TabFragment.TAG_SINGER__FRAGMENT_SELECTED;
 
-public class MainActivity extends AppCompatActivity implements ListItemSingerFragment.CallBackList,TabFragment.CallBack, ListItemsAlbumFragment.CallBackList,MediaPlayerControler.callback {
+public class MainActivity extends AppCompatActivity implements ListItemSingerFragment.CallBackList, MusicAdapter.CallBack,
+        ListItemsAlbumFragment.CallBackList,
+        AlbumAdapter.CallBack, SingerAdapter.CallBack {
+
+    public static final String TAG_TAB_FRAGMENT = "TAG_TAB_FRAGMENT";
+    public static final String TAG_ALBUM__ITEM_SELECTED = "TAG_ALBUM__ITEM_SELECTED";
+    public static final String TAG_SINGER__ITEM_SELECTED = "TAG_SINGER__ITEM_SELECTED";
 
     private ViewPager mViewPager;
     private TabLayout mTableLayout;
@@ -85,8 +98,8 @@ public class MainActivity extends AppCompatActivity implements ListItemSingerFra
     public void onBackPressed() {
 
 
-        listItemsFragment = (ListItemsAlbumFragment) getSupportFragmentManager().findFragmentByTag(TAG_ALBUM__FRAGMENT_SELECTED);
-        ListItemSingerFragment listItemSingerFragment = (ListItemSingerFragment) getSupportFragmentManager().findFragmentByTag(TAG_SINGER__FRAGMENT_SELECTED);
+        listItemsFragment = (ListItemsAlbumFragment) getSupportFragmentManager().findFragmentByTag(TAG_ALBUM__ITEM_SELECTED);
+        ListItemSingerFragment listItemSingerFragment = (ListItemSingerFragment) getSupportFragmentManager().findFragmentByTag(TAG_SINGER__ITEM_SELECTED);
         if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED)
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
@@ -94,18 +107,18 @@ public class MainActivity extends AppCompatActivity implements ListItemSingerFra
             if(mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED)
                 getSupportFragmentManager().beginTransaction().show(listItemSingerFragment).commit();
             else {
-                showTab();
+
                 getSupportFragmentManager().beginTransaction().detach(listItemSingerFragment).remove(listItemSingerFragment).commit();
-                getSupportFragmentManager().beginTransaction().show(getSupportFragmentManager().findFragmentByTag(pagerAdapter.tagSingerTab)).commit();
+                getSupportFragmentManager().beginTransaction().show(getSupportFragmentManager().findFragmentByTag(TAG_TAB_FRAGMENT)).commit();
             }
         }
         else if (listItemsFragment != null) {
             if(mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED)
                 getSupportFragmentManager().beginTransaction().show(listItemsFragment).commit();
             else {
-                showTab();
+
                 getSupportFragmentManager().beginTransaction().detach(listItemsFragment).remove(listItemsFragment).commit();
-                getSupportFragmentManager().beginTransaction().show(getSupportFragmentManager().findFragmentByTag(pagerAdapter.tagAlbumTab)).commit();
+                getSupportFragmentManager().beginTransaction().show(getSupportFragmentManager().findFragmentByTag(TAG_TAB_FRAGMENT)).commit();
             }
         } else {
             super.onBackPressed();
@@ -120,7 +133,13 @@ public class MainActivity extends AppCompatActivity implements ListItemSingerFra
         setContentView(R.layout.activity_main);
 
         findView();
-        setAdapter();
+        //setAdapter();
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentById(R.id.container_fragment);
+        if(fragment == null)
+            fragmentManager.beginTransaction().add(R.id.container_fragment,TabFragment.newInstance(), TAG_TAB_FRAGMENT).commit();
+
         if (checkPermissionREAD_EXTERNAL_STORAGE(this))
             mMediaPlayerControler = MediaPlayerControler.getInstance(this);
 
@@ -345,22 +364,6 @@ public class MainActivity extends AppCompatActivity implements ListItemSingerFra
 
     }
 
-    private void setAdapter() {
-
-        mViewPager = findViewById(R.id.viewpager);
-        mTableLayout = findViewById(R.id.tab_layout);
-        ArrayList<String> tabList = new ArrayList<>();
-        tabList.add("musics");
-        tabList.add("albums");
-        tabList.add("singers");
-        pagerAdapter = new PagerAdapter(getSupportFragmentManager(), tabList);
-        tabLayout.setupWithViewPager(mViewPager);
-        mViewPager.setAdapter(pagerAdapter);
-
-
-    }
-
-
     private void findView() {
         mViewPager = findViewById(R.id.viewpager);
         tabLayout = findViewById(R.id.tab_layout);
@@ -396,7 +399,9 @@ public class MainActivity extends AppCompatActivity implements ListItemSingerFra
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
-    public void onItemMusicSelected(Music music, int pos, ArrayList<Music> musicList) {
+    public void onItemMusicSelected(Music music, int pos, ArrayList<Music> musicList, Uri uri) {
+
+        mMediaPlayerControler.play(this,uri);
         mSeekBar.setMax(music.getintDuration() / 1000);
         if (mMediaPlayerControler.flagIsPlaying == true) {
             pausePlayButton.setImageDrawable(getDrawable(R.drawable.pause_button));
@@ -419,17 +424,6 @@ public class MainActivity extends AppCompatActivity implements ListItemSingerFra
         }
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
-    }
-
-    @Override
-    public void hideTab() {
-
-        tabLayout.setVisibility(View.INVISIBLE);
-    }
-
-    public void showTab() {
-
-        tabLayout.setVisibility(View.VISIBLE);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -464,13 +458,6 @@ public class MainActivity extends AppCompatActivity implements ListItemSingerFra
 
         return timeLabel;
     }
-
-    @Override
-    public void changeUi() {
-        pausePlayButton.setImageResource(R.drawable.play_button);
-        pausePlayButtonExpand.setImageResource(R.drawable.play_button);
-    }
-
 
     public boolean checkPermissionREAD_EXTERNAL_STORAGE(final Context context) {
         int currentAPIVersion = Build.VERSION.SDK_INT;
@@ -528,5 +515,46 @@ public class MainActivity extends AppCompatActivity implements ListItemSingerFra
                 super.onRequestPermissionsResult(requestCode, permissions,
                         grantResults);
         }
+    }
+
+
+    @Override
+    public void onItemAlbumSelected(Album album) {
+        FragmentManager fm = getSupportFragmentManager();
+        TabFragment tabFragment = (TabFragment) fm.findFragmentByTag(TAG_TAB_FRAGMENT);
+        fm.beginTransaction().add(R.id.container_fragment,ListItemsAlbumFragment.newInstance(album), TAG_ALBUM__ITEM_SELECTED).hide(tabFragment).commit();
+    }
+
+    @Override
+    public void onItemSingerSelected(Singer singer) {
+        FragmentManager fm = getSupportFragmentManager();
+        TabFragment tabFragment = (TabFragment) fm.findFragmentByTag(TAG_TAB_FRAGMENT);
+        fm.beginTransaction().add(R.id.container_fragment,ListItemSingerFragment.newInstance(singer), TAG_SINGER__ITEM_SELECTED).hide(tabFragment).commit();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void onItemMusicSelected(Music music, int pos, ArrayList<Music> musicArrayList) {
+        mSeekBar.setMax(music.getintDuration() / 1000);
+        if (mMediaPlayerControler.flagIsPlaying == true) {
+            pausePlayButton.setImageDrawable(getDrawable(R.drawable.pause_button));
+            pausePlayButtonExpand.setImageDrawable(getDrawable(R.drawable.pause_button));
+        }
+        this.pos = pos;
+        this.mMusicArrayList = musicArrayList;
+        this.music = music;
+
+        singerTextView.setText(music.getSinger());
+        musicTextView.setText(music.getTitle());
+        mTextViewDuratin.setText(music.getDuration());
+
+        if (BitmapFactory.decodeFile(music.getCoverMusic()) == null) {
+            mImageViewPic.setImageResource(R.drawable.music_cover);
+            mImageViewExpandCoverSheet.setImageResource(R.drawable.music_cover);
+        } else {
+            mImageViewPic.setImageBitmap(BitmapFactory.decodeFile(music.getCoverMusic()));
+            mImageViewExpandCoverSheet.setImageBitmap(BitmapFactory.decodeFile(music.getCoverMusic()));
+        }
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
 }

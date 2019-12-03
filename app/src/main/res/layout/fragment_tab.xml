@@ -9,8 +9,51 @@
 
     tools:context=".Controller.TabFragment">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
 
-    <ScrollView
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tab_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            app:tabSelectedTextColor="#F8F7F2"
+            app:tabIndicatorColor="@color/colorAccent"
+            app:tabTextColor="#F0EFEB"
+            >
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ARTIST" />
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ALBUME" />
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SONGS"
+                android:fadingEdge="vertical"
+
+                />
+        </com.google.android.material.tabs.TabLayout>
+
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/viewpager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </androidx.viewpager.widget.ViewPager>
+
+    </LinearLayout>
+
+<!--    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         >
@@ -23,7 +66,7 @@
 
     </androidx.recyclerview.widget.RecyclerView>
 
-    </ScrollView>
+    </ScrollView>-->
 
 
 </LinearLayout>
